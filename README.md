@@ -140,6 +140,65 @@ The score is a pre-underwriting support tool, not a final credit decision. It do
 | Predictive ML default model | Not implemented | Out of scope by design |
 | Money movement or loan disbursement | Not implemented | Out of scope by design |
 
+### Business process flowchart
+
+The diagram below maps the end-to-end ForkFund marketplace process and shows which steps are built, simulated, or out of scope.
+
+```mermaid
+flowchart TD
+    classDef impl fill:#0B6B56,color:#fff,stroke:#0B6B56
+    classDef sim  fill:#C49A2E,color:#fff,stroke:#C49A2E
+    classDef out  fill:#f0f0f0,color:#888,stroke:#bbb,stroke-dasharray:4 4
+
+    subgraph R["Restaurant"]
+        R1[Register + specify loan need]:::impl
+        R2[Connect bank data via PSD2]:::sim
+        R3[Connect POS data]:::sim
+        R4[Connect accounting data]:::sim
+        R5[KvK identity check]:::sim
+        R6[View lender offers]:::impl
+        R7[Accept or decline offer]:::impl
+    end
+
+    subgraph P["ForkFund Platform"]
+        P1[Compute 9-dimension score]:::impl
+        P2[Generate Credit Passport]:::impl
+        P3[Assign peer percentile]:::impl
+    end
+
+    subgraph L["Lender"]
+        L1[Register with DNB number]:::impl
+        L2[DNB verification]:::sim
+        L3[Browse and filter restaurant pool]:::impl
+        L4[Open Credit Passport]:::impl
+        L5[Submit financing offer]:::impl
+    end
+
+    subgraph X["Out of scope"]
+        X1[Live PSD2 open-banking API]:::out
+        X2[Live KvK API]:::out
+        X3[Persistent database]:::out
+        X4[Real authentication backend]:::out
+        X5[ML default probability model]:::out
+        X6[Loan disbursement]:::out
+    end
+
+    R1 --> R2 & R3 & R4
+    R2 & R3 & R4 --> R5
+    R5 --> P1 --> P2 --> P3
+    P3 --> L3
+    L1 --> L2 --> L3 --> L4 --> L5 --> R6 --> R7
+
+    R2 -. replaces .-> X1
+    R5 -. replaces .-> X2
+    R1 -. replaces .-> X4
+    L1 -. replaces .-> X4
+    P1 -. replaces .-> X5
+    R7 -. leads to .-> X6
+```
+
+**Legend:** green = implemented, gold = simulated in MVP, gray dashed = out of scope
+
 ---
 
 ## AI agent workflow
